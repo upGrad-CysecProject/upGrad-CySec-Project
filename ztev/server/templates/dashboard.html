@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+  <h1 class="text-center">Dashboard</h1>
+  <div class="row">
+    <div class="col-sm-8 offset-sm-2">
+      <p>Welcome to the dashboard, {{ g._oidc_userinfo.email }}!</p>
+      <p>Your user information has been pulled from the <code>g._oidc_userinfo</code>
+      object, which makes accessing your user information simple. 
+      Your user id (<code>{{ g._oidc_userinfo.sub }}</code>)</p>
+    </div>
+  </div>
+{% endblock %}

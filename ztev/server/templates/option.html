@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Option for Topic: {{ topic['name'] }}{% endblock %}
+
+{% block content %}
+  <div>
+     {% if method and method in ['PUT', 'POST'] %}
+        <form action="{{ url }}" name="optionform" id="optionform" class="form form-horizontal" method="POST">
+     {% endif %}
+     <table class="table" border="1">
+        <thead>
+            <th>Attribute</th>
+            <th>Value</th>
+        </thead>
+         
+        <tbody>
+            {% for key in colnames %}
+               <tr>
+                  {% if key == "id" and option %}
+                     <td>{{ key }}</td>
+                     {% if method and method in ['PUT', 'POST'] %}
+                        <td><a href="{{ url }}" ><input class="form-control" type="text" name="{{key}}" value="{{ option[key] if option else ''}}" readonly/></a></td>
+                     {% else %}
+                        <td><a href="{{ url }}{{ option[key] }}" >{{ option[key] }}</a></td>
+                     {% endif %}
+                  {% else %}
+                  	<td>{{ key }}</td>
+                     {% if key in editables %}
+                        {% if method and method in ['PUT', 'POST'] %}
+                           <td> <input class="form-control" type="text" name="{{key}}" value="{{ option[key] if option else ''}}"/> </td>
+                        {% else %}
+                           <td>{{ option[key] if option else '' }}</td>
+                        {% endif %}
+                     {% else %}
+                        {% if method not in ['POST'] %}
+                           <td>{{ option[key] if option else '' }}</td> 
+                        {% endif %}
+                     {% endif %}
+                  {% endif %}
+               </tr>
+            {% endfor %}
+            {% if method and method in ['PUT', 'POST'] %}
+              <tr><td/><td><button type="submit">Submit</button></td></tr>
+            {% endif %}
+         </tbody>
+     </table>
+     <div class="alert alert-dismissible fade show" id="alert-message" role="alert">
+       <div id="message"></div>
+       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     
+       <!-- Modal confirm -->
+     <div class="modal" id="confirmModal" style="display: none; z-index: 1050;">
+       <div class="modal-dialog">
+         <div class="modal-content">
+           <div class="modal-body" id="confirmMessage">
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-default" id="confirmOk">Ok</button>
+                 <button type="button" class="btn btn-default" id="confirmCancel">Cancel</button>
+               </div>
+         </div>
+       </div>
+     </div>
+
+     </div>
+
+     {% if method and method in ['PUT', 'POST'] %}
+       </form>
+     {% endif %}                 
+          
+ {% endblock %}
+
+{% block script %}
+{% if method and method in ['PUT', 'POST'] %}
+  <script type="text/javascript">
+  
+  $(document).ready(function() { 
+      $('form#optionform').bind('submit', function (e) {
+          e.preventDefault();
+          console.log("Form submitted");
+          var data = {};
+          $(this).serializeArray().map(function(item) {
+              if ( data[item.name] ) {
+                  if ( typeof(data[item.name]) === "string" ) {
+                      data[item.name] = [data[item.name]];
+                  }
+                  data[item.name].push(item.value);
+              } else {
+                  data[item.name] = item.value;
+              }
+          });
+          data = JSON.stringify(data);
+          console.log(data);
+          $.ajax({
+              type: "{{ method }}",
+              {% if method in ['PUT'] %}
+                url: "{{ url_for('api_option', topic_id=topic["id"], id=option["id"]) }}",
+              {% elif method in ['POST'] %}
+                url: "{{ url_for('api_options', topic_id=topic["id"])}}",
+              {% endif %}  
+              dataType: "json",
+              contentType: 'application/json; charset=utf-8',
+              data: data,
+              success: function (result, textStatus) {
+                    console.log(result, textStatus);
+                    $('#message').html(result.message);
+                    $("#alert-message").fadeTo(2000, 500).slideUp(500, function(){
+                       $("#alert-message").slideUp(500);
+                    });
+                    window.location.href = result.url;
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                 var msg = '';
+                 if (jqXHR.status === 0) {
+                     msg = 'Not connect.\n Verify Network.';
+                 } else if (jqXHR.status == 404) {
+                     msg = 'Requested page not found. [404]' + jqXHR.responseText;
+                 } else if (jqXHR.status == 500) {
+                     msg = 'Internal Server Error [500].';
+                 } else {
+                     msg = errorThrown + ": " + jqXHR.responseJSON.message;
+                 }
+                 console.log(msg, textStatus, errorThrown);
+                 console.log( jqXHR.responseJSON);
+                 $('#message').html(msg);
+                 $("#alert-message").fadeTo(2000, 500).slideUp(500, function(){
+                   $("#alert-message").slideUp(500);
+                 });
+              }
+          });
+          return false;
+      });
+  });
+  </script>
+  
+  
+  {% endif %}
+
+{% endblock %}

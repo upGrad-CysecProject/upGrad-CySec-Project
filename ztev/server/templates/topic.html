@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Voting Topic: {{ topic['name'] if topic else '' }}{% endblock %}
+
+{% block content %}
+  <div>
+     {% if method and method in ['PUT', 'POST'] %}
+        <form action="{{ url }}" name="topicform" id="topicform" class="form form-horizontal" method="POST">
+     {% endif %}
+     <table class="table" border="1">
+        <thead>
+            <th>Attribute</th>
+            <th>Value</th>
+        </thead>
+         
+        <tbody>
+            {% for key in colnames %}
+               <tr>
+                  {% if key == "id" and topic %}
+                     <td>{{ key }}</td>
+                     {% if method and method in ['PUT', 'POST'] %}
+                        <td><div class="col-md-12"><a href="{{ url }}" ><input class="form-control" type="text" name="{{key}}" value="{{ topic[key] if topic else ''}}" readonly/></a></div></td>
+                     {% else %}
+                        <td><div class="col-md-12"> <a href="{{ url }}" >{{ topic[key] }}</a></div></td>
+                     {% endif %}
+                  {% else %}
+                  	<td><div class="col-md-12">{{ key }}</div></td>
+                     {% if key in editables %}
+                        {% if method and method in ['PUT', 'POST'] %}
+                           <td> <div class="col-md-12"><input class="form-control {% if '_time' in key %}date" id="datetimepicker{{ loop.index }}" style="position: relative{% endif %}" 
+                                       type="text" name="{{key}}" value="{{ topic[key] if topic else ''}}"/></div> </td>
+                        {% else %}
+                           <td><div class="col-md-12">{{ topic[key] if topic else '' }}</div></td>
+                        {% endif %}
+                     {% else %}
+                        {% if method not in ['POST'] %}
+                           <td><div class="col-md-12">{{ topic[key] if topic else '' }}</div></td> 
+                        {% endif %}
+                     {% endif %}
+                  {% endif %}
+               </tr>
+            {% endfor %}
+            {% if method and method in ['PUT', 'POST'] %}
+            <tr><td/><td><button type="submit">Submit</button></td></tr>
+            {% endif %}
+         </tbody>
+     </table>
+     <div class="alert alert-dismissible fade show" id="alert-message" role="alert">
+       <div id="message"></div>
+       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     
+       <!-- Modal confirm -->
+     <div class="modal" id="confirmModal" style="display: none; z-index: 1050;">
+       <div class="modal-dialog">
+         <div class="modal-content">
+           <div class="modal-body" id="confirmMessage">
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-default" id="confirmOk">Ok</button>
+                 <button type="button" class="btn btn-default" id="confirmCancel">Cancel</button>
+               </div>
+         </div>
+       </div>
+     </div>
+     </div>
+     {% if method and method not in ['POST'] %}
+       <div>
+          <br/>  
+          <h4>Voting options for the topic</h4>
+          <table class="table" border="0">
+              <thead>
+                  <tr>
+                      <th>Option Number</td>
+                      {% for col in optioncols %}
+                         {% if col != "id" %}
+                           <th>{{ col }}</th>
+                         {% endif %}
+                      {% endfor %}
+                  </tr>
+              </thead>
+              <tbody>
+       	      {% if options %}
+                  {% for record in options %}
+                  <tr>
+                      <td><a href="{{ url_for('api_option', topic_id=topic['id'], id=record["id"]) }}" > {{ loop.index }}</a></td>
+                      {% for col in optioncols %}
+                         {% if col != "id" %}
+                           <td>{{ record[col] }}</td>
+                         {% endif %}
+                      {% endfor %}
+                      {% if vote %}
+                         <td><a href="{{ client_url }}?topic_id={{ topic['id'] }}&option_id={{ record['id'] }}" class="vote_link">Vote Now</a>
+                      {% endif %}
+                  </tr>
+                  {% endfor %}
+              {% endif %}
+              </tbody>
+          </table>
+          {% if method in ['PUT'] %} 
+             <a href="{{ url_for('api_option', topic_id=topic['id'], id=0) }}">Add Options</a>
+          {% endif %}
+       </div>
+       <div>
+         <br/>  
+          <h4>Group Invite to vote to topic</h4>
+          <table class="table" border="0">
+              <thead>
+                  <tr>
+                      <th>Invite ID</td>
+                      {% for col in invitecols %}
+                         {% if col != "id" %}
+                           <th>{{ col }}</th>
+                         {% endif %}
+                      {% endfor %}
+                  </tr>
+              </thead>
+              <tbody>
+       	      {% if invites %}
+                  {% for record in invites %}
+                  <tr>
+                      <td><a href="{{ url_for('api_invite', topic_id=topic['id'], id=record["id"]) }}" > {{ record["id"] }}</a></td>
+                      {% for col in invitecols %}
+                         {% if col != "id" %}
+                           <td>{{ record[col] }}</td>
+                         {% endif %}
+                      {% endfor %}
+                  </tr>
+                  {% endfor %}
+              {% endif %}
+              </tbody>
+          </table>
+          {% if method in ['PUT'] %} 
+             <a href="{{ url_for('api_invite', topic_id=topic['id'], id=0) }}">Invite another group</a>
+          {% endif %}
+       </div>
+
+     {% endif %}
+     {% if votes %}
+         <br/>  
+         <h4> Votes casted </h4>
+         <table class="table" border="0">
+             <thead>
+                 <tr>
+                     {% for col in votecols %}
+                        <th>{{ col }}</th>
+                     {% endfor %}
+                 </tr>
+             </thead>
+             <tbody>
+                 {% for record in votes %}
+                 <tr>
+                     {% for col in votecols %}
+                        <td>{{ record[col] }}</td>
+                     {% endfor %}
+                 </tr>
+                 {% endfor %}
+             </tbody>
+         </table>
+    {% endif %} 
+    {% if method and method in ['PUT', 'POST'] %}
+      </form>
+    {% endif %}                 
+          
+  
+   </div>
+  
+  {% endblock %}
+
+  {% block script %}
+  {% if method and method in ['PUT', 'POST'] %}
+  <script type="text/javascript">
+  
+  $(document).ready(function() {
+      $(function () {
+         {% for key in colnames %}
+           {% if '_time' in key %}           
+           $('#datetimepicker{{ loop.index }}').datetimepicker({format: 'YYYY-MM-DD'});
+           {% endif %}
+         {% endfor %}
+      });
+      $('form#topicform').bind('submit', function (e) {
+          e.preventDefault();
+          console.log("Form submitted");
+          var data = {};
+          $(this).serializeArray().map(function(item) {
+              if ( data[item.name] ) {
+                  if ( typeof(data[item.name]) === "string" ) {
+                      data[item.name] = [data[item.name]];
+                  }
+                  data[item.name].push(item.value);
+              } else {
+                  data[item.name] = item.value;
+              }
+          });
+          data = JSON.stringify(data);
+          console.log(data);
+          $.ajax({
+              type: "{{ method }}",
+              url: "{{ url }}",
+
+              dataType: "json",
+              contentType: 'application/json; charset=utf-8',
+              data: data,
+              success: function (result, textStatus) {
+                    console.log(result, textStatus);
+                    $('#message').html(result.message);
+                    $("#alert-message").fadeTo(2000, 500).slideUp(500, function(){
+                       $("#alert-message").slideUp(500);
+                    });
+                    window.location.href = result.url;
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                 var msg = '';
+                 if (jqXHR.status === 0) {
+                     msg = 'Not connect.\n Verify Network.';
+                 } else if (jqXHR.status == 404) {
+                     msg = 'Requested page not found. [404]' + jqXHR.responseText;
+                 } else if (jqXHR.status == 500) {
+                     msg = 'Internal Server Error [500].';
+                 } else {
+                     msg = errorThrown + ": " + jqXHR.responseJSON.message;
+                 }
+                 console.log(msg, textStatus, errorThrown);
+                 console.log( jqXHR.responseJSON);
+                 $('#message').html(msg);
+                 $("#alert-message").fadeTo(2000, 500).slideUp(500, function(){
+                   $("#alert-message").slideUp(500);
+                 });
+              }
+          });
+          return false;
+      });
+      function confirmDialog(message, onConfirm){
+             var fClose = function(){
+         		  modal.modal("hide");
+             };
+             var modal = $("#confirmModal");
+             modal.modal("show");
+             $("#confirmMessage").empty().append(message);
+             $("#confirmOk").unbind().one('click', onConfirm).one('click', fClose);
+             $("#confirmCancel").unbind().one("click", fClose);
+      }
+      $('a.vote_link').click(function(e){
+         e.preventDefault();
+         var url = $(this).attr("href");
+         console.log(url);
+         var MESSAGE = "You will be redirected to local client to vote. Confirm?";
+         confirmDialog(MESSAGE, function(){
+           console.log("redirected!");
+           window.open(url, '_blank'); 
+         });
+      });
+  });
+  </script>
+  
+  
+  {% endif %}
+  {% endblock %}

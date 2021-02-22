@@ -1,0 +1,3 @@
+[submodule "ztev/packages/flask-oidc-cognito"]
+	path = ztev/packages/flask-oidc-cognito
+	url = git@github.com:piyushroshan/flask-oidc-cognito.git

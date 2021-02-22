@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Voting Topics{% endblock %}
+
+{% block content %}
+<div>
+{% for key, values in topics.items() %}
+   <h2>{{key}}</h1>
+   <table class="table" border="0">
+       <thead>
+           <tr>
+               {% for col in colnames %}
+               <th>{{ col }}</th>
+               {% endfor %}
+           </tr>
+       </thead>
+       <tbody>
+           {% for record in values %}
+           <tr>
+               {% for col in colnames %}
+                  {% if col == "id" %}
+                    <td><a href="{{ url }}{{ record[col] }}" >{{ record[col] }}</a></td>
+                  {% else %}
+                    <td>{{ record[col] }}</td>
+                  {% endif %}
+               {% endfor %}
+           </tr>
+           {% endfor %}
+       </tbody>
+   </table>
+   
+{% endfor %}
+<div> <a href="{{ url }}0">Add new topic</a></div>
+</div>
+{% endblock %}
+

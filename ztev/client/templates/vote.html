@@ -1,0 +1,32 @@
+{% extends "bootstrap/base.html" %}
+{% block body %}
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script type=text/javascript src="{{ url_for('static', filename='jquery-3.5.1.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title> ZTEV Client | {% block title %}{% endblock %}</title>
+  </head>
+  <body>
+
+    <div class="content">
+        <div class="container">
+            {% block content %}
+              <div> <p> {{message}} </p>
+              <script>
+                  setTimeout(function(){
+                      window.location.href = '{{url}}';
+                  }, 5000);
+              </script>
+            {% endblock %}
+        </div>
+    </div>
+  </body>
+  </html>
+{% endblock %}
+
+
