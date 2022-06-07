@@ -81,10 +81,10 @@ ztev/README.md
   ```
   Name          Desc    Precedence
   -----------------------------
-  admin 	Admin	5	
-  devops	DevOps	20	
-  eng   	Development Engineering	25	
-  it	        IT	10	
+  admin 	Admin	                 5	
+  devops	DevOps	               20	
+  eng   Development Engineering	 25	
+  it	        IT	               10	
   ```
   
   Add 5 users to the user pool created above.
