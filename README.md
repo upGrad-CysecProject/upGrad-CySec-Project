@@ -1,7 +1,7 @@
 # upGrad-CySec-Project
 ztev/README.md
-This document is in reference with using the aws region us-east-1
-Sign in to aws console and visit https://us-east-1.console.aws.amazon.com/cognito/users
+- This document is in reference with using the aws region us-east-1
+- Sign in to aws console and visit https://us-east-1.console.aws.amazon.com/cognito/users
 
 - Create a user pool. 
   Enter a name, and click on review defaults. 
@@ -48,6 +48,7 @@ Sign in to aws console and visit https://us-east-1.console.aws.amazon.com/cognit
   
   With Docker
   ```docker run -i --name ztev-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=ztev -p 5432:5432 --rm postgres```
+  
 - Go to the server folder.
   ``` Requirements from system packages openssl development library ```
   ```pip install -r requirements.txt # try "pip install poetry" if it fails to install cryptograpy```
@@ -58,6 +59,8 @@ Sign in to aws console and visit https://us-east-1.console.aws.amazon.com/cognit
  ```python3 app.py```
   or 
   ```gunicorn wsgi:app```
+  
+  
 - Go to the client folder.
   ```cp client_secrets.json.example client_secrets.json ```
   Update the <pool-id>, <domain-prefix>, <client_id> and <client_secret> in the client_secrets.json.
@@ -71,6 +74,8 @@ Sign in to aws console and visit https://us-east-1.console.aws.amazon.com/cognit
   ```python3 app.py ```
   or
   ```gunicorn wsgi:app```
+  
+  
 - Management: 
   Add 4 groups to the user pool
   ```
